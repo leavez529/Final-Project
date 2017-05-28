@@ -1,14 +1,14 @@
 #include"SceneManager.h"
-#include"MenuLayer.h"
 #include"gameLayer.h"
 void SceneManager::creatScene() {
 	startScene = Scene::create();
-	auto menulayer = MenuLayer::create();
-	menulayer->smr = this;
-	startScene->addChild(menulayer);
 
 }
 void SceneManager::toGameScene() {
-	gameScene = GameLevelLayer::scene();
-	Director::getInstance()->replaceScene(gameScene);
+	gameScene = Scene::createWithPhysics();
+	gameScene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	gameScene->getPhysicsWorld()->setGravity(Vect(0.0f, -200.0f));
+	auto game = GameLevelLayer::create();
+	gameScene->addChild(game);
+	Director::getInstance()->runWithScene(gameScene);
 }
