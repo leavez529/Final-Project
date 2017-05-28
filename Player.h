@@ -1,13 +1,20 @@
-class GameLevelLayer : public cocos2d::CCLayer
-{
-public:
-	GameLevelLayer(void) {};
-	~GameLevelLayer(void) {};
-	CREATE_FUNC(GameLevelLayer);
+#include"cocos2d.h"
+USING_NS_CC;
 
-	bool init();
-	static cocos2d::CCScene* scene();
-	SceneManager* smr;
-protected:
-	cocos2d::CCTMXTiledMap *map;
+#pragma once
+class Player : public cocos2d::Sprite {
+public:
+	Player() {
+		face = 'r';
+	};
+	~Player() {};
+	static Player* create(const char *pszFileName);
+	void update(float delta) {};
+	float acc=0.005;
+	float velocityx;
+	int velocityy;
+	int accx;
+	char face;
+	
+	
 };
