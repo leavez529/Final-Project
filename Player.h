@@ -10,11 +10,6 @@ public:
 	~Player() {};
 	static Player* create(const char *pszFileName);
 	void update(float delta) {};
-	float acc=0.005;
-	float velocityx;
-	int velocityy;
-	int accx;
 	char face;
-	
-	
+
 };
