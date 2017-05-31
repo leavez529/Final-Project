@@ -11,4 +11,5 @@ public:
 	static Player* create(const char *pszFileName);
 	void update(float delta) {};
 	char face;
+
 };
