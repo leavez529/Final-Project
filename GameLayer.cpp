@@ -5,7 +5,8 @@ USING_NS_CC;
 
 
 bool GameLevelLayer::init() {
-	map = TMXTiledMap::create("untiled.tmx");
+	map = TMXTiledMap::create("MarioMap1.tmx");
+	map->setScale(2);
 	map->setAnchorPoint(Vec2::ZERO);
 	map->setPosition(Vec2::ZERO);
 	this->addChild(map, -1);
@@ -20,35 +21,68 @@ bool GameLevelLayer::init() {
 	screenWidth = visibleSize.width;
 	screenHeight = visibleSize.height;
 
-	_player = Player::create("HelloWorld.png");
-	_player->setPosition(x,y);
+	_player = Player::create("MarioStand.png");
+	_player->setPosition(20,100);
+	_player->setScale(2);
+	_player->setTag(1);
 	auto body = PhysicsBody::createBox(_player->getContentSize());
+	body->setRotationEnable(false);
+	body->setEnabled(true);
+	body->setCategoryBitmask(0x01);
+	body->setContactTestBitmask(0x01);
+	body->setCollisionBitmask(0x01);
+	body->setGroup(0);
 	PhysicsShape* ps = body->getShape(0);
 	ps->setMass(0.2f);
+	ps->setFriction(0);
 	ps->setDensity(0.2f);
-	ps ->setFriction(1.0f);
 	ps->setRestitution(0);
 	_player->setPhysicsBody(body);
-	this->addChild(_player,1);//设置人物
+	this->addChild(_player, 1);//设置人物
+	
+	
 
-	auto staticbody = PhysicsBody::createBox(map->getTileSize());
-	staticbody->setDynamic(false);
+	Land = map->getLayer("land");
+	int gid;
+	for (int i = 0; i < Land->getLayerSize().width; i++) {
+		gid = Land->getTileGIDAt(Vec2(i, 12));
+		if (gid) {
+			(Land->getTileAt(Vec2(i, 12)))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width / 2,
+				map->getTileSize().height / 2)));
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setCategoryBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setContactTestBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setCategoryBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setGroup(0);
+		}
+	}
+	log("%d", _player->getTag());
+	Pipe = map->getLayer("pipe");
+	for (int i = 0; i < Pipe->getLayerSize().width; i++) {
+		for (int j = 0; j < Pipe->getLayerSize().height; j++) {
+			gid = Pipe->getTileGIDAt(Vec2(i, j));
+			if (gid) {
+				Pipe->getTileAt(Vec2(i, j))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width / 2,
+					map->getTileSize().height / 2)));
+			}
+		}
+	}
+	Block = map->getLayer("block");
+	for (int i = 0; i < Block->getLayerSize().width; i++) {
+		for (int j = 0; j < Block->getLayerSize().height; j++){
+			gid = Block->getTileGIDAt(Vec2(i, j));
+			if (gid) {
+				Block->getTileAt(Vec2(i, j))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width / 2,
+					map->getTileSize().height / 2)));
+			}
+		}
+	}
 	
-	auto Land = map->getLayer("land");
-	Land->setPhysicsBody(staticbody);
-	int tileGid;
-	Sprite* landsp;
-	//for (int i = 0; i < Land->getLayerSize().height; i++) {
-	//	for (int j = 0; j < Land->getLayerSize().width; j++) {
-	//		tileGid = Land->getTileGIDAt(Vec2(i, j));
-	//		if (tileGid) {
-	//			landsp = Land->getTileAt(Vec2(i, j));
-	//			auto hide = Hide::create();
-	//			landsp->runAction(hide);
-	//		}
-	//	}
-	//}
-	
+	auto contactListener = EventListenerPhysicsContact::create();
+	contactListener->onContactBegin =CC_CALLBACK_1(GameLevelLayer::onContactBegin, this);
+	contactListener->onContactPreSolve = CC_CALLBACK_2(GameLevelLayer::onContactPreSolve, this);
+	contactListener->onContactPostSolve = CC_CALLBACK_2(GameLevelLayer::onContactPostSolve, this);
+	contactListener->onContactSeparate = CC_CALLBACK_1(GameLevelLayer::onContactSeparate, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
 
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(GameLevelLayer::onKeyPressed, this);
@@ -59,10 +93,29 @@ bool GameLevelLayer::init() {
 }
 void GameLevelLayer::onKeyPressed(EventKeyboard::KeyCode keycode, Event* event) {
 		keys[keycode] = true;
+		auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
+		auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
+		auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+		if (keycode == rightarrow) {
+			smallWalkRight();
+		}
+		if (keycode == leftarrow) {
+			smallWalkLeft();
+		}
 }
 void GameLevelLayer::onKeyReleased(EventKeyboard::KeyCode keycode, Event* event) {
 		keys[keycode] = false;
-		_player->velocityx = 0;
+		auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
+		auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
+		auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+		if (keycode == rightarrow) {
+			_player->stopActionByTag(11);
+		}
+		if (keycode == leftarrow) {
+			_player->stopActionByTag(12);
+		}
 }
 void GameLevelLayer::update(float delta) {
 	auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
@@ -70,26 +123,19 @@ void GameLevelLayer::update(float delta) {
 	auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
 	auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 	if (isKeyPressed(rightarrow)) {
-		if (_player->face == 'l') {
-			Action* flipx = FlipX::create(true);
-			log("%c", _player->face);
-			_player->runAction(flipx);
-			_player->runAction(flipx->reverse());
-			_player->face = 'r';
-			log("%c", _player->face);
-		}
 		keyPressedDuration(rightarrow,delta);
-		
 	}
 	if (isKeyPressed(leftarrow)) {
-		if (_player->face == 'r') {
-			Action* flipx = FlipX::create(true);
-			log("%c", _player->face);
-			_player->runAction(flipx);
-			_player->face = 'l';
-		}
-		
 		keyPressedDuration(leftarrow,delta);
+	}
+	if (!isKeyPressed(rightarrow)&&_player->getPhysicsBody()->getVelocity().x>0) {
+		_player->getPhysicsBody()->setVelocity(Vect(0,_player->getPhysicsBody()->getVelocity().y));
+	}
+	if (!isKeyPressed(leftarrow) && _player->getPhysicsBody()->getVelocity().x<0) {
+		_player->getPhysicsBody()->setVelocity(Vect(0, _player->getPhysicsBody()->getVelocity().y));
+	}
+	if (isKeyPressed(uparrow)) {
+		keyPressedDuration(uparrow, delta);
 	}
 
 }
@@ -103,43 +149,30 @@ bool GameLevelLayer::isKeyPressed(EventKeyboard::KeyCode keycode) {
 }
 
 void GameLevelLayer::keyPressedDuration(EventKeyboard::KeyCode keycode,float delta) {
-	if (_player->velocityx < 5) {
-		_player->velocityx += _player->acc*delta;
-	}
-	int offsetX = 0, offsetY = 0;
 	switch (keycode) {
 	case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
-		offsetX = -5;
+		if (_player->getPhysicsBody()->getVelocity().x > -80) {
+			_player->getPhysicsBody()->applyImpulse(Vect(-100, 0));
+		}
 		break;
 	case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
-		offsetX = 5;
+		if (_player->getPhysicsBody()->getVelocity().x < 80) {
+			_player->getPhysicsBody()->applyImpulse(Vect(100, 0));
+		}
 		break;
-	default:
-		offsetY = offsetX = 0;
+	case EventKeyboard::KeyCode::KEY_UP_ARROW:
+		if (_player->isOnGround) {
+			if (_player->getPhysicsBody()->getVelocity().y < 150) {
+				log("jump");
+				_player->getPhysicsBody()->applyImpulse(Vect(0, 6000));
+
+				_player->isOnGround = false;
+			}
+		}
 		break;
 	}
-	
-	// 0.3s代表着动作从开始到结束所用的时间，从而显得不会那么机械。
-	auto moveTo = MoveTo::create(0.3, Vec2(_player->getPositionX() + offsetX, _player->getPositionY() + offsetY));
-	_player->runAction(moveTo);
 	setViewpointCenter(_player->getPosition());
 
-}
-void GameLevelLayer::smallwalkright() {
-	SpriteFrame *frame = NULL;
-
-	auto animation = Animation::create();
-	for (int i = 0; i < 11; i++)
-	{
-		frame = SpriteFrame::create("HelloWorld.png", Rect(i * 14, 0, 14, 16));
-		animation->addSpriteFrame(frame);
-	}
-	animation->setDelayPerUnit(3.0f / 15.0f);
-	animation->setRestoreOriginalFrame(true);
-	auto animate = Animate::create(animation);
-	auto repeatanimate = RepeatForever::create(animate);
-	_player->runAction(repeatanimate);
-	log("success?");
 }
 
 void GameLevelLayer::setViewpointCenter(Vec2 position) {
@@ -153,11 +186,57 @@ void GameLevelLayer::setViewpointCenter(Vec2 position) {
 	this->setPosition(viewPoint);
 
 }
+bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
+	Sprite* spriteA = (Sprite*)contact.getShapeA()->getBody()->getNode();
+	Sprite* spriteB = (Sprite*)contact.getShapeB()->getBody()->getNode();
+	if (spriteA&&spriteB) {
+		if (spriteA->getTag() == 1 && spriteB->getPhysicsBody()->getGroup()==0 || spriteA->getPhysicsBody()->getGroup() == 0 && spriteB->getTag() == 1) {
+			_player->isOnGround = true;
+			log("on ground");
+		}
+	}
+	return true;
+}
 
+bool GameLevelLayer::onContactPreSolve(PhysicsContact& contact, PhysicsContactPreSolve& solve) {
+	
+	return true;
+}
+void GameLevelLayer::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostSolve& solve) {
+	
+}
+void GameLevelLayer::onContactSeparate(PhysicsContact& contact) {
 
-
-
-
-
-
-
+}
+void GameLevelLayer::smallWalkRight() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("smallWalkRight.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("smallWalkRight%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "smallWalkRight");
+	auto smallWalkRight = AnimationCache::getInstance()->getAnimation("smallWalkRight");
+	auto animate = Animate::create(smallWalkRight);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(11);
+	_player->runAction(repeat);
+}
+void GameLevelLayer::smallWalkLeft() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("smallWalkLeft.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("smallWalkLeft%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "smallWalkLeft");
+	auto smallWalkLeft = AnimationCache::getInstance()->getAnimation("smallWalkLeft");
+	auto animate = Animate::create(smallWalkLeft);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(12);
+	_player->runAction(repeat);
+}
