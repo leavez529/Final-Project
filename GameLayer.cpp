@@ -55,6 +55,22 @@ bool GameLevelLayer::init() {
 	listener->onKeyReleased = CC_CALLBACK_2(GameLevelLayer::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 	scheduleUpdate();//键盘监听
+	
+	//定时器，游戏时间5分钟//////
+	auto timerLayer = Layer::create();
+	timerLabel = Label::create();
+    	timerLabel->setTextColor(Color4B::WHITE);
+   	timerLabel->setSystemFontSize(40);
+    	timerLabel->setAnchorPoint(Vec2(0, 1));
+    	timerLabel->setPosition(Vec2(20, visibleSize.height));
+    	timerLater->addChild(timerLabel);
+    	startTime = time(NULL);
+    	schedule(schedule_selector(GameLayer::timer));
+	this->addChild(timerLayer, 200);
+	/////////////////
+	
+	
+	
 	return true;
 }
 void GameLevelLayer::onKeyPressed(EventKeyboard::KeyCode keycode, Event* event) {
@@ -154,7 +170,16 @@ void GameLevelLayer::setViewpointCenter(Vec2 position) {
 
 }
 
-
+void GameLayer:: timer(float dt){
+    double usedTime_s = 300-difftime(time(NULL), startTime);
+    if (usedTime_s>=0) {
+        double usedTime_min = usedTime_s/60;
+        timerLabel->setString(StringUtils::format("%02d:%02d", (int)usedTime_min,(int)(usedTime_s)%60));
+    } else {
+        unschedule(schedule_selector(GameLayer::timer));
+        //执行游戏结束的函数
+    }
+}
 
 
 
