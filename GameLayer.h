@@ -4,6 +4,9 @@
 #include"Player.h"
 class GameLevelLayer : public cocos2d::CCLayer
 {
+private:
+    time_t startTime;
+    Label* timerLabel;
 public:
 	GameLevelLayer(void) {};
 	~GameLevelLayer(void) {};
@@ -20,6 +23,7 @@ public:
 	void keyPressedDuration(EventKeyboard::KeyCode keycode,float delta);
 	void smallwalkright();
 	void setViewpointCenter(Vec2 positon);
+	void timer(float dt);
 protected:
 	cocos2d::CCTMXTiledMap *map;
 	cocos2d::TMXLayer *Land;
