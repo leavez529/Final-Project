@@ -5,9 +5,17 @@ USING_NS_CC;
 
 
 bool GameLevelLayer::init() {
-	map = TMXTiledMap::create("untiled.tmx");
+	SimpleAudioEngine::getInstance()->preloadBackgroundMusic("OnLand.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("Jump.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("EatCoin.wav");
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	screenWidth = visibleSize.width;
+	screenHeight = visibleSize.height;
+	map = TMXTiledMap::create("MarioMap1.tmx");
 	map->setAnchorPoint(Vec2::ZERO);
-	map->setPosition(Vec2::ZERO);
+	map->setPosition(Point::ZERO);
+	float scale = screenHeight / (map->getMapSize().height*map->getTileSize().height);
+	map->setScale(scale);
 	this->addChild(map, -1);
 	//加载地图
 
@@ -16,69 +24,145 @@ bool GameLevelLayer::init() {
 	int x = _map.at("x").asInt();
 	int y = _map.at("y").asInt();//起点位置
 
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	screenWidth = visibleSize.width;
-	screenHeight = visibleSize.height;
+	SimpleAudioEngine::getInstance()->playBackgroundMusic("OnLand.wav",1);
+	_player = Player::create("smallJumpRight.png");
 
-	_player = Player::create("HelloWorld.png");
-	_player->setPosition(x,y);
+
+	_player->setPosition(20,100);
+	_player->setAnchorPoint(Vec2(0.5f, 0.5f));
+	//setViewpointCenter(Point(20, 100));
+	_player->setScale(1);
+	_player->setTag(1);
 	auto body = PhysicsBody::createBox(_player->getContentSize());
+	body->setRotationEnable(false);
+	body->setEnabled(true);
+	body->setCategoryBitmask(0x01);
+	body->setContactTestBitmask(0x01);
+	body->setCollisionBitmask(0x01);
+	body->setGroup(0);
 	PhysicsShape* ps = body->getShape(0);
 	ps->setMass(0.2f);
+	ps->setFriction(0);
 	ps->setDensity(0.2f);
-	ps ->setFriction(1.0f);
 	ps->setRestitution(0);
 	_player->setPhysicsBody(body);
-	this->addChild(_player,1);//设置人物
+	this->addChild(_player, 1);//设置人物
+	
+	
 
-	auto staticbody = PhysicsBody::createBox(map->getTileSize());
-	staticbody->setDynamic(false);
+	Land = map->getLayer("land");
+	int gid;
+	for (int i = 0; i < Land->getLayerSize().width; i++) {
+		gid = Land->getTileGIDAt(Vec2(i, 12));
+		if (gid) {
+			(Land->getTileAt(Vec2(i, 12)))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width ,
+				map->getTileSize().height)));
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setCategoryBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setContactTestBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setCollisionBitmask(0x01);
+			(Land->getTileAt(Vec2(i, 12)))->getPhysicsBody()->setGroup(1);
+		}
+	}
+	Pipe = map->getLayer("pipe");
+	for (int i = 0; i < Pipe->getLayerSize().width; i++) {
+		for (int j = 0; j < Pipe->getLayerSize().height; j++) {
+			gid = Pipe->getTileGIDAt(Vec2(i, j));
+			if (gid) {
+				Pipe->getTileAt(Vec2(i, j))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width,
+					map->getTileSize().height)));
+				Pipe->getTileAt(Vec2(i, j))->getPhysicsBody()->setCategoryBitmask(0x01);
+				Pipe->getTileAt(Vec2(i, j))->getPhysicsBody()->setCollisionBitmask(0x01);
+				Pipe->getTileAt(Vec2(i, j))->getPhysicsBody()->setContactTestBitmask(0x01);
+				Pipe->getTileAt(Vec2(i, j))->getPhysicsBody()->setGroup(1);
+			}
+		}
+	}
+	Block = map->getLayer("block");
+	for (int i = 0; i < Block->getLayerSize().width; i++) {
+		for (int j = 0; j < Block->getLayerSize().height; j++){
+			gid = Block->getTileGIDAt(Vec2(i, j));
+			if (gid) {
+				Block->getTileAt(Vec2(i, j))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width,
+					map->getTileSize().height)));
+				Block->getTileAt(Vec2(i, j))->getPhysicsBody()->setCategoryBitmask(0x01);
+				Block->getTileAt(Vec2(i, j))->getPhysicsBody()->setCollisionBitmask(0x01);
+				Block->getTileAt(Vec2(i, j))->getPhysicsBody()->setContactTestBitmask(0x01);
+				Block->getTileAt(Vec2(i, j))->getPhysicsBody()->setGroup(1);
+
+			}
+		}
+	}
+	Coin = map->getLayer("coin");
+	for (int i = 0; i < Coin->getLayerSize().width; i++) {
+		for (int j = 0; j <Coin->getLayerSize().height; j++) {
+			gid = Coin->getTileGIDAt(Vec2(i, j));
+			if (gid) {
+				Coin->getTileAt(Vec2(i, j))->setPhysicsBody(PhysicsBody::createEdgeBox(Size(map->getTileSize().width,
+					map->getTileSize().height)));
+				Coin->getTileAt(Vec2(i, j))->getPhysicsBody()->setCategoryBitmask(0x01);
+				Coin->getTileAt(Vec2(i, j))->getPhysicsBody()->setContactTestBitmask(0x01);
+				Coin->getTileAt(Vec2(i, j))->getPhysicsBody()->setCollisionBitmask(0x02);
+				Coin->getTileAt(Vec2(i, j))->getPhysicsBody()->setGroup(2);
+			}
+		}
+	}
+
 	
-	auto Land = map->getLayer("land");
-	Land->setPhysicsBody(staticbody);
-	int tileGid;
-	Sprite* landsp;
-	//for (int i = 0; i < Land->getLayerSize().height; i++) {
-	//	for (int j = 0; j < Land->getLayerSize().width; j++) {
-	//		tileGid = Land->getTileGIDAt(Vec2(i, j));
-	//		if (tileGid) {
-	//			landsp = Land->getTileAt(Vec2(i, j));
-	//			auto hide = Hide::create();
-	//			landsp->runAction(hide);
-	//		}
-	//	}
-	//}
-	
+	auto contactListener = EventListenerPhysicsContact::create();
+	contactListener->onContactBegin =CC_CALLBACK_1(GameLevelLayer::onContactBegin, this);
+	contactListener->onContactPreSolve = CC_CALLBACK_2(GameLevelLayer::onContactPreSolve, this);
+	contactListener->onContactPostSolve = CC_CALLBACK_2(GameLevelLayer::onContactPostSolve, this);
+	contactListener->onContactSeparate = CC_CALLBACK_1(GameLevelLayer::onContactSeparate, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
 
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(GameLevelLayer::onKeyPressed, this);
 	listener->onKeyReleased = CC_CALLBACK_2(GameLevelLayer::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 	scheduleUpdate();//键盘监听
-	
-	//定时器，游戏时间5分钟//////
+					 //定时器，游戏时间5分钟////// 
+
 	auto timerLayer = Layer::create();
 	timerLabel = Label::create();
-    	timerLabel->setTextColor(Color4B::WHITE);
-   	timerLabel->setSystemFontSize(40);
-    	timerLabel->setAnchorPoint(Vec2(0, 1));
-    	timerLabel->setPosition(Vec2(20, visibleSize.height));
-    	timerLater->addChild(timerLabel);
-    	startTime = time(NULL);
-    	schedule(schedule_selector(GameLayer::timer));
+	timerLabel->setTextColor(Color4B::WHITE);
+	timerLabel->setSystemFontSize(40);
+	timerLabel->setAnchorPoint(Vec2(0, 1));
+	timerLabel->setPosition(Vec2(20, visibleSize.height));
+	timerLayer->addChild(timerLabel);
+	startTime = time(NULL);
+	schedule(schedule_selector(GameLevelLayer::timer));
 	this->addChild(timerLayer, 200);
-	/////////////////
-	
-	
-	
 	return true;
 }
 void GameLevelLayer::onKeyPressed(EventKeyboard::KeyCode keycode, Event* event) {
 		keys[keycode] = true;
+		auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
+		auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
+		auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+		if (keycode == rightarrow) {
+			smallWalkRight();
+		}
+		if (keycode == leftarrow) {
+			smallWalkLeft();
+		}
 }
 void GameLevelLayer::onKeyReleased(EventKeyboard::KeyCode keycode, Event* event) {
 		keys[keycode] = false;
-		_player->velocityx = 0;
+		auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
+		auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
+		auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
+		auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+		if (keycode == rightarrow) {
+		
+				_player->stopActionByTag(11);
+		
+		}
+		if (keycode == leftarrow) {
+			
+				_player->stopActionByTag(12);
+			
+		}
 }
 void GameLevelLayer::update(float delta) {
 	auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
@@ -86,26 +170,23 @@ void GameLevelLayer::update(float delta) {
 	auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
 	auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 	if (isKeyPressed(rightarrow)) {
-		if (_player->face == 'l') {
-			Action* flipx = FlipX::create(true);
-			log("%c", _player->face);
-			_player->runAction(flipx);
-			_player->runAction(flipx->reverse());
-			_player->face = 'r';
-			log("%c", _player->face);
-		}
 		keyPressedDuration(rightarrow,delta);
-		
 	}
 	if (isKeyPressed(leftarrow)) {
-		if (_player->face == 'r') {
-			Action* flipx = FlipX::create(true);
-			log("%c", _player->face);
-			_player->runAction(flipx);
-			_player->face = 'l';
-		}
-		
+
 		keyPressedDuration(leftarrow,delta);
+	}
+	if (!isKeyPressed(rightarrow)&&_player->getPhysicsBody()->getVelocity().x>0) {
+		_player->getPhysicsBody()->setVelocity(Vect(0,_player->getPhysicsBody()->getVelocity().y));
+	}
+	if (!isKeyPressed(leftarrow) && _player->getPhysicsBody()->getVelocity().x<0) {
+		_player->getPhysicsBody()->setVelocity(Vect(0, _player->getPhysicsBody()->getVelocity().y));
+	}
+	if (isKeyPressed(uparrow)) {
+		keyPressedDuration(uparrow, delta);
+	}
+	if (_player->getPosition().y <= 0) {
+		playerdie();
 	}
 
 }
@@ -119,70 +200,153 @@ bool GameLevelLayer::isKeyPressed(EventKeyboard::KeyCode keycode) {
 }
 
 void GameLevelLayer::keyPressedDuration(EventKeyboard::KeyCode keycode,float delta) {
-	if (_player->velocityx < 5) {
-		_player->velocityx += _player->acc*delta;
-	}
-	int offsetX = 0, offsetY = 0;
 	switch (keycode) {
 	case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
-		offsetX = -5;
+		if (_player->getPhysicsBody()->getVelocity().x > -150) {
+			_player->getPhysicsBody()->applyImpulse(Vect(-400, 0));
+		}
 		break;
 	case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
-		offsetX = 5;
+		if (_player->getPhysicsBody()->getVelocity().x < 150) {
+			_player->getPhysicsBody()->applyImpulse(Vect(400, 0));
+		}
 		break;
-	default:
-		offsetY = offsetX = 0;
+	case EventKeyboard::KeyCode::KEY_UP_ARROW:
+		if (_player->isOnGround) {
+			SimpleAudioEngine::getInstance()->playEffect("Jump.wav");
+			if (_player->getPhysicsBody()->getVelocity().y < 500) {
+				_player->getPhysicsBody()->applyImpulse(Vect(0, 7000));
+				_player->isOnGround = false;
+				log("jump");
+			}
+			
+		}
 		break;
 	}
-	
-	// 0.3s代表着动作从开始到结束所用的时间，从而显得不会那么机械。
-	auto moveTo = MoveTo::create(0.3, Vec2(_player->getPositionX() + offsetX, _player->getPositionY() + offsetY));
-	_player->runAction(moveTo);
 	setViewpointCenter(_player->getPosition());
 
-}
-void GameLevelLayer::smallwalkright() {
-	SpriteFrame *frame = NULL;
-
-	auto animation = Animation::create();
-	for (int i = 0; i < 11; i++)
-	{
-		frame = SpriteFrame::create("HelloWorld.png", Rect(i * 14, 0, 14, 16));
-		animation->addSpriteFrame(frame);
-	}
-	animation->setDelayPerUnit(3.0f / 15.0f);
-	animation->setRestoreOriginalFrame(true);
-	auto animate = Animate::create(animation);
-	auto repeatanimate = RepeatForever::create(animate);
-	_player->runAction(repeatanimate);
-	log("success?");
 }
 
 void GameLevelLayer::setViewpointCenter(Vec2 position) {
 	int x = MAX(position.x, screenWidth / 2);
-	int y = MAX(position.y, screenHeight / 2);
+	int y = 0;
 	x = MIN(x, (map->getMapSize().width*map->getTileSize().width - screenWidth / 2));
-	y = MIN(y, (map->getMapSize().height*map->getTileSize().height - screenHeight / 2));
 	Point actualPosition = Vec2(x, y);
-	Point center = Vec2(screenWidth / 2, screenHeight / 2);
+	Point center = Vec2(screenWidth / 2,0);
 	Point viewPoint = center - actualPosition;
 	this->setPosition(viewPoint);
 
 }
+bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
+	Sprite* spriteA = (Sprite*)contact.getShapeA()->getBody()->getNode();
+	Sprite* spriteB = (Sprite*)contact.getShapeB()->getBody()->getNode();
+	if (spriteA&&spriteB) {
+		if (spriteA->getTag() == 1 && spriteB->getPhysicsBody()->getGroup()==1 || spriteA->getPhysicsBody()->getGroup() == 1 && spriteB->getTag() == 1) {
+			if (spriteB->getPhysicsBody()->getGroup() == 0) {
+					_player->isOnGround = true;
+			}
 
-void GameLayer:: timer(float dt){
-    double usedTime_s = 300-difftime(time(NULL), startTime);
-    if (usedTime_s>=0) {
-        double usedTime_min = usedTime_s/60;
-        timerLabel->setString(StringUtils::format("%02d:%02d", (int)usedTime_min,(int)(usedTime_s)%60));
-    } else {
-        unschedule(schedule_selector(GameLayer::timer));
-        //执行游戏结束的函数
-    }
+			if (spriteA->getPhysicsBody()->getGroup() == 0) {
+					_player->isOnGround = true;
+			}
+		}
+		if (spriteA->getTag() == 1 && spriteB->getPhysicsBody()->getGroup() == 2 || spriteA->getPhysicsBody()->getGroup() == 2 && spriteB->getTag() == 1) {
+			log("eat");
+			if (spriteB->getPhysicsBody()->getGroup() == 2) {
+				spriteB->removeFromParent();
+			}
+			if (spriteA->getPhysicsBody()->getGroup() == 2) {
+				spriteA->removeFromParent();
+			}
+			SimpleAudioEngine::getInstance()->playEffect("EatCoin.wav");
+		}
+	}
+	return true;
 }
 
-
-
-
-
-
+bool GameLevelLayer::onContactPreSolve(PhysicsContact& contact, PhysicsContactPreSolve& solve) {
+	return true;
+}
+void GameLevelLayer::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostSolve& solve) {
+	
+}
+void GameLevelLayer::onContactSeparate(PhysicsContact& contact) {
+	
+}
+void GameLevelLayer::smallWalkRight() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("smallWalkRight.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("smallWalkRight%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "smallWalkRight");
+	auto smallWalkRight = AnimationCache::getInstance()->getAnimation("smallWalkRight");
+	auto animate = Animate::create(smallWalkRight);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(11);
+	_player->runAction(repeat);
+}
+void GameLevelLayer::smallWalkLeft() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("smallWalkLeft.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("smallWalkLeft%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "smallWalkLeft");
+	auto smallWalkLeft = AnimationCache::getInstance()->getAnimation("smallWalkLeft");
+	auto animate = Animate::create(smallWalkLeft);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(12);
+	_player->runAction(repeat);
+}
+Vec2 GameLevelLayer::tileCoordForPosition(const Vec2& position) {
+	Size mapsize = map->getMapSize();
+	Size tilesize = map->getTileSize();
+	int x = position.x / tilesize.width;
+	int y = (mapsize.height*tilesize.height - position.y) / tilesize.height;
+	return Vec2(x, y);
+}
+void GameLevelLayer::updatewhenjump() {
+	auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
+	auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
+	auto uparrow = EventKeyboard::KeyCode::KEY_UP_ARROW;
+	auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
+	_player->stopAllActions();
+	log("jump");
+	while (!_player->isOnGround) {
+		_player->initWithFile("smallJumpRight.png");
+	}
+	if (keys[rightarrow]) {
+		smallWalkRight();
+	}
+	if (keys[leftarrow]) {
+		smallWalkLeft();
+	}
+}
+void GameLevelLayer::playerdie(){
+	_player->stopAllActions();
+	unscheduleUpdate();
+	_player->initWithFile("die.png");
+	_player->getPhysicsBody()->setVelocity(Vec2::ZERO);
+	_player->getPhysicsBody()->setCategoryBitmask(0x02);
+	_player->getPhysicsBody()->setContactTestBitmask(0x02);
+	_player->getPhysicsBody()->setCollisionBitmask(0x02);
+	_player->getPhysicsBody()->setVelocity(Vec2(0, 150));
+}
+void GameLevelLayer::timer(float dt) {
+	double usedTime_s = 300 - difftime(time(NULL), startTime);
+	if (usedTime_s >= 0) {
+		double usedTime_min = usedTime_s / 60;
+		timerLabel->setString(StringUtils::format("%02d:%02d", (int)usedTime_min, (int)(usedTime_s) % 60));
+	}
+	else {
+		unschedule(schedule_selector(GameLevelLayer::timer));
+		playerdie();        //执行游戏结束的函数 
+	}
+}
