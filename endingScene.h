@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 #include "MenuLayer.h"
-#include "GameLevelLayer.h"
+#include "GameLayer.h"
 #include"SimpleAudioEngine.h"
 USING_NS_CC;
 
