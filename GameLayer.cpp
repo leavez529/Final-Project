@@ -240,6 +240,8 @@ bool GameLevelLayer::init() {
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
 	//键盘监听
+	
+	timerLayer = Layer::create();
 
 	 //定时器，游戏时间5分钟////// 
 	auto timerLayer = Layer::create();
@@ -259,12 +261,54 @@ bool GameLevelLayer::init() {
 	startTime = time(NULL);
 
 	schedule(schedule_selector(GameLevelLayer::timer));
-
-	this->addChild(timerLayer, 200);
-
+	
 	scheduleOnce(schedule_selector(GameLevelLayer::updateStart), 0);
+	
+	//声音按钮
+    if (SimpleAudioEngine::getInstance()->getBackgroundMusicVolume()==1) {
+	    
+        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("声音:开", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+	
+	soundLabel->setTag(11);
+	    
+    } 
+    else {
+		
+        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("声音:关", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+        
+	soundLabel->setTag(10);
+	    
+    }
+	
+    soundLabel->setAnchorPoint(Vec2(0.5, 1));
+	
+    soundLabel->setPositionX(visibleSize.width/2);
+	
+    soundLabel->setColor(Color3B::WHITE);
+    
+    //返回按钮
+    saveLabel = MenuItemLabel::create(Label::createWithSystemFont("返回", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+    
+    saveLabel->setTag(20);
+	
+    saveLabel->setAnchorPoint(Vec2(1, 1));
+	
+    saveLabel->setPositionX(visibleSize.width - 20);
+	
+    saveLabel->setColor(Color3B::WHITE);
 
-	return true;
+    //menu
+    auto menu = Menu::create(soundLabel, saveLabel, NULL);
+	
+    menu->setPosition(origin.x,timerLabel->getPositionY());
+	
+    timerLayer->addChild(menu);
+
+	
+	
+    this->addChild(timerLayer, 200);
+	
+    return true;
 
 }
 
@@ -693,10 +737,13 @@ void GameLevelLayer::timer(float dt) {
 	}
 
 	else {
-
+		
 		unschedule(schedule_selector(GameLevelLayer::timer));
 
-		playerdie();        //执行游戏结束的函数 
+		//执行游戏结束的函数
+		playerdie();  
+		
+		toEndingScene(false); 
 
 	}
 
@@ -712,4 +759,78 @@ Scene* GameLevelLayer::createScene() {
 	auto layer = GameLevelLayer::create();
 	scene->addChild(layer);
 	return scene;
+}
+
+void GameLevelLayer:: menuCallBack(Ref* pSender){
+    switch (((MenuItemImage *)pSender)->getTag()) {
+		    
+        case 10:    
+            SimpleAudioEngine::getInstance()->resumeAllEffects();
+		    
+            SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1);
+		    
+	    soundLabel->setString("声音:开");
+		    
+            soundLabel->setTag(11);
+		    
+            break;
+		    
+        case 11:
+            SimpleAudioEngine::getInstance()->pauseAllEffects();
+		    
+            SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0);
+		    
+	    soundLabel->setString("声音:关");
+		    
+            soundLabel->setTag(10);
+		    
+            break;
+		    
+        case 20:
+            //存储游戏进度，未完成
+		    
+            SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+		    
+            SimpleAudioEngine::getInstance()->stopAllEffects();
+		    
+            toMainScene();
+		    
+            break;
+		    
+        default:
+            break;
+		    
+    }
+}
+
+void GameLevelLayer:: toEndingScene(const bool& isPass){
+	
+    SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	
+    SimpleAudioEngine::getInstance()->stopAllEffects();
+	
+    auto scene = Scene::create();
+	
+    auto layer = endingScene::create();
+	
+    layer->passTheGame = isPass;
+	
+    layer->addTitle();
+	
+    scene->addChild(layer);
+	
+    Director::getInstance()->replaceScene(scene);
+	
+}
+
+void GameLevelLayer:: toMainScene(){
+	
+    SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	
+    SimpleAudioEngine::getInstance()->stopAllEffects();
+	
+    auto scene = MenuLayer::createScene();
+	
+    Director::getInstance()->replaceScene(scene);
+	
 }
