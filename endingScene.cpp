@@ -24,7 +24,7 @@ bool endingScene::init()
     
     /////////score
     /*
-    auto score = Label::create("", "Arial", 60);
+    auto score = Label::create("", "Arial", 40);
     
     score->setString(StringUtils::format("Score: %d",i_score));
     
@@ -37,7 +37,7 @@ bool endingScene::init()
     */////////////////////////////
     
     //重新开始按钮
-    auto restartButton = MenuItemLabel::create(Label::createWithSystemFont("重新开始", "Arial", 40), CC_CALLBACK_1(endingScene::endingCallBack, this));
+    auto restartButton = MenuItemLabel::create(Label::createWithSystemFont("Play Again", "Arial", 25), CC_CALLBACK_1(endingScene::endingCallBack, this));
     
     restartButton->setPosition(Vec2(visibleSize.width*0.35+origin.x, visibleSize.height*0.3+origin.y));
     
@@ -46,7 +46,7 @@ bool endingScene::init()
     restartButton->setTag(1);
     
     //结束游戏按钮
-    auto exitButton = MenuItemLabel::create(Label::createWithSystemFont("结束游戏", "Arial", 40), CC_CALLBACK_1(endingScene::endingCallBack, this));
+    auto exitButton = MenuItemLabel::create(Label::createWithSystemFont("Exit", "Arial", 25), CC_CALLBACK_1(endingScene::endingCallBack, this));
     
     exitButton->setPosition(Vec2(visibleSize.width*0.65+origin.x, visibleSize.height*0.3+origin.y));
     
@@ -108,7 +108,7 @@ void endingScene:: addTitle(){
     
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
-    auto title = Label::create("GAME  OVER", "Arial", 70);
+    auto title = Label::create("GAME  OVER", "Arial", 50);
     
     if (passTheGame == true) {
         title->setString("WELL  DONE!");
