@@ -91,7 +91,7 @@ bool MenuLayer::init() {
 
 	auto rankButton = MenuItemImage::create("button_rank.png", "button_rank_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
 
-	rankButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.65));
+	rankButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.53));
 
 	rankButton->setScale(0.3);
 
@@ -99,13 +99,13 @@ bool MenuLayer::init() {
 
 
 
-	auto settingButton = MenuItemImage::create("button_setting.png", "button_setting_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
+	auto continueButton = MenuItemImage::create("button_continue.png", "button_continue_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
 
-	settingButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.53));
+	continueButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.65));
 
-	settingButton->setScale(0.3);
+	continueButton->setScale(0.3);
 
-	settingButton->setTag(3);
+	continueButton->setTag(3);
 
 
 
@@ -121,7 +121,7 @@ bool MenuLayer::init() {
 
 	//create menu
 
-	auto menu = Menu::create(startButton, rankButton, settingButton, exitButton, NULL);
+	auto menu = Menu::create(startButton, rankButton, continueButton, exitButton, NULL);
 
 	menu->setPosition(Vec2::ZERO);
 
