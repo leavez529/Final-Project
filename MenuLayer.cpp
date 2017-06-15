@@ -2,7 +2,9 @@
 
 #include "MenuLayer.h"
 
-#include"gameLayer.h"
+#include"GameLayer.h"
+
+#include "ranklistScene.h"
 
 void MenuLayer::menuCallback(Ref* pSender) {
 
@@ -16,13 +18,13 @@ void MenuLayer::menuCallback(Ref* pSender) {
 
 	case 2:
 
-
+        
 
 		break;
 
 	case 3:
 
-
+        toRanklistScene();
 
 		break;
 
@@ -42,11 +44,22 @@ void MenuLayer::menuCallback(Ref* pSender) {
 
 }
 
+
 void MenuLayer::toGameScene() {
+    
 	auto gameScene = GameLevelLayer::createScene();
 
 	Director::getInstance()->replaceScene(gameScene);
 
+}
+
+
+void MenuLayer::toRanklistScene(){
+    
+    auto scene = ranklistScene::createScene();
+    
+    Director::getInstance()->replaceScene(scene);
+    
 }
 
 
@@ -87,26 +100,23 @@ bool MenuLayer::init() {
 
 	startButton->setTag(1);
 
-
-
-	auto rankButton = MenuItemImage::create("button_rank.png", "button_rank_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
-
-	rankButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.53));
-
-	rankButton->setScale(0.3);
-
-	rankButton->setTag(2);
-
-
-
+    
 	auto continueButton = MenuItemImage::create("button_continue.png", "button_continue_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
 
 	continueButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.65));
 
 	continueButton->setScale(0.3);
 
-	continueButton->setTag(3);
-
+	continueButton->setTag(2);
+    
+    
+    auto rankButton = MenuItemImage::create("button_rank.png", "button_rank_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
+    
+    rankButton->setPosition(Vec2(visibleSize.width*0.2, visibleSize.height*0.53));
+    
+    rankButton->setScale(0.3);
+    
+    rankButton->setTag(3);
 
 
 	auto exitButton = MenuItemImage::create("button_exit.png", "button_exit_selected.png", CC_CALLBACK_1(MenuLayer::menuCallback, this));
@@ -116,7 +126,6 @@ bool MenuLayer::init() {
 	exitButton->setScale(0.3);
 
 	exitButton->setTag(4);
-
 
 
 	//create menu
