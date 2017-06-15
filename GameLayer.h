@@ -4,6 +4,8 @@
 
 #include"Player.h"
 
+#include "endingScene.h"
+
 #include"SimpleAudioEngine.h"
 
 using namespace CocosDenshion;
@@ -62,6 +64,12 @@ public:
 
 	void timer(float dt);
 	void updateStart(float dt);
+	
+	void toEndingScene(const bool& isPass);
+    
+    	void toMainScene();
+    
+    	void menuCallBack(Ref* pSender);
 
 protected:
 
@@ -78,7 +86,11 @@ protected:
 private:
 
 	time_t startTime;
-
-	Label* timerLabel;
+	
+    	Label* timerLabel;
+    	MenuItemLabel* soundLabel;
+    	MenuItemLabel* saveLabel;
+	
+    	Layer* timerLayer;
 
 };
