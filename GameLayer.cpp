@@ -281,7 +281,7 @@ void GameLevelLayer::onKeyPressed(EventKeyboard::KeyCode keycode, Event* event) 
 	auto downarrow = EventKeyboard::KeyCode::KEY_DOWN_ARROW;
 
 	if (keycode == rightarrow) {
-
+	
 		smallWalkRight();
 
 	}
@@ -293,7 +293,7 @@ void GameLevelLayer::onKeyPressed(EventKeyboard::KeyCode keycode, Event* event) 
 	}
 
 }
-
+	
 void GameLevelLayer::onKeyReleased(EventKeyboard::KeyCode keycode, Event* event) {
 
 	keys[keycode] = false;
@@ -331,7 +331,14 @@ void GameLevelLayer::onKeyReleased(EventKeyboard::KeyCode keycode, Event* event)
 void GameLevelLayer::update(float delta) {
 	//Point position = _player->getPosition();
 	//log("%f,%f", position.x, position.y);
-
+        int x = _player->getPositionX();
+	if (x < screenWidth / 2) {
+		x = screenWidth / 2;
+	}
+	if (x > map->getMapSize().width*map->getTileSize().width - screenWidth / 2) {
+		x = map->getMapSize().width*map->getTileSize().width - screenWidth / 2;
+	}
+	timerLayer->setPositionX(x - screenWidth / 2);
 	auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
 
 	auto leftarrow = EventKeyboard::KeyCode::KEY_LEFT_ARROW;
