@@ -2,6 +2,15 @@
 
 #include "ranklistScene.h"
 
+#define setInt UserDefault::getInstance()->setIntegerForKey
+
+#define getInt UserDefault::getInstance()->getIntegerForKey
+
+using namespace std;
+
+USING_NS_CC;
+
+
 ranklistScene::ranklistScene(){
     
 }
@@ -100,13 +109,16 @@ bool ranklistScene:: init(){
     
     
     //更新游戏数据
-    /*
-    no1->setString(StringUtils::format("No.1    %d",///第一名分数/////));
+    
+    sortScores();
+    
+    
+    no1->setString(StringUtils::format("No.1    %d",getInt("score1")));
      
-    no2->setString(StringUtils::format("No.2    %d",///第二名分数/////));
+    no2->setString(StringUtils::format("No.2    %d",getInt("score2")));
      
-    no3->setString(StringUtils::format("No.3    %d",///第三名分数/////));
-    */
+    no3->setString(StringUtils::format("No.3    %d",getInt("score3")));
+    
     
     
     return true;
@@ -138,5 +150,23 @@ void ranklistScene:: toMainScene(){
 void ranklistScene:: backCallback(Ref* pSender){
     
     toMainScene();
+    
+}
+
+
+void ranklistScene::sortScores(){
+    
+    vector<int> scores;
+    
+    scores.push_back(getInt("score1"));
+    scores.push_back(getInt("score2"));
+    scores.push_back(getInt("score3"));
+    scores.push_back(getInt("score"));
+    
+    sort(scores.begin(), scores.end());
+    
+    setInt("score1", scores[3]);
+    setInt("score2", scores[2]);
+    setInt("score3", scores[1]);
     
 }
