@@ -22,6 +22,8 @@ bool GameLevelLayer::init() {
 	SimpleAudioEngine::getInstance()->preloadEffect("EatCoin.wav");
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
+	
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	screenWidth = visibleSize.width;
 
@@ -250,7 +252,7 @@ bool GameLevelLayer::init() {
 
 	timerLabel->setTextColor(Color4B::WHITE);
 
-	timerLabel->setSystemFontSize(40);
+	timerLabel->setSystemFontSize(30);
 
 	timerLabel->setAnchorPoint(Vec2(0, 1));
 
@@ -267,14 +269,14 @@ bool GameLevelLayer::init() {
 	//声音按钮
     if (SimpleAudioEngine::getInstance()->getBackgroundMusicVolume()==1) {
 	    
-        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("声音:开", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("Sound:on", "Arial", 30), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
 	
 	soundLabel->setTag(11);
 	    
     } 
     else {
 		
-        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("声音:关", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+        soundLabel = MenuItemLabel::create(Label::createWithSystemFont("Sound:off", "Arial", 30), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
         
 	soundLabel->setTag(10);
 	    
@@ -287,7 +289,7 @@ bool GameLevelLayer::init() {
     soundLabel->setColor(Color3B::WHITE);
     
     //返回按钮
-    saveLabel = MenuItemLabel::create(Label::createWithSystemFont("返回", "Arial", 40), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
+    saveLabel = MenuItemLabel::create(Label::createWithSystemFont("Back", "Arial", 30), CC_CALLBACK_1(GameLevelLayer::menuCallBack, this));
     
     saveLabel->setTag(20);
 	
@@ -769,7 +771,7 @@ void GameLevelLayer:: menuCallBack(Ref* pSender){
 		    
             SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(1);
 		    
-	    soundLabel->setString("声音:开");
+	    soundLabel->setString("Sound:on");
 		    
             soundLabel->setTag(11);
 		    
@@ -780,7 +782,7 @@ void GameLevelLayer:: menuCallBack(Ref* pSender){
 		    
             SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0);
 		    
-	    soundLabel->setString("声音:关");
+	    soundLabel->setString("Sound:off");
 		    
             soundLabel->setTag(10);
 		    
