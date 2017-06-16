@@ -1,4 +1,5 @@
 #include "endingScene.h"
+
 USING_NS_CC;
 
 
@@ -14,6 +15,7 @@ bool endingScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
     //background
+    
     auto background = Sprite::create("bg_ending.jpg");
     
     background->setScale(0.5);
@@ -22,19 +24,19 @@ bool endingScene::init()
     
     this->addChild(background, 0);
     
-    /////////score
-    /*
+    
+    //score
+    
     auto score = Label::create("", "Arial", 40);
     
-    score->setString(StringUtils::format("Score: %d",i_score));
+    score->setString(StringUtils::format("Score: %d",UserDefault::getInstance()->getIntegerForKey("score")));
     
     score->setPosition(Vec2(visibleSize.width*0.5+origin.x, visibleSize.height*0.5+origin.y));
     
     score->setColor(Color3B::WHITE);
     
     this->addChild(score);
-    
-    */////////////////////////////
+   
     
     //重新开始按钮
     auto restartButton = MenuItemLabel::create(Label::createWithSystemFont("Play Again", "Arial", 25), CC_CALLBACK_1(endingScene::endingCallBack, this));
@@ -67,9 +69,6 @@ bool endingScene::init()
 
 void endingScene::endingCallBack(Ref* pSender){
 
-    //记录分数，录入排行榜，未完成
-    //
-    
     switch (((MenuItemLabel *)pSender)->getTag()) {
     
         case 1:
@@ -111,7 +110,9 @@ void endingScene:: addTitle(){
     auto title = Label::create("GAME  OVER", "Arial", 50);
     
     if (passTheGame == true) {
+        
         title->setString("WELL  DONE!");
+        
     }
     
     title->setPosition(Vec2(visibleSize.width*0.5+origin.x, visibleSize.height*0.7+origin.y));
