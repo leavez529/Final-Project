@@ -246,7 +246,6 @@ bool GameLevelLayer::init() {
 	timerLayer = Layer::create();
 
 	 //定时器，游戏时间5分钟////// 
-	auto timerLayer = Layer::create();
 
 	timerLabel = Label::create();
 
@@ -377,6 +376,12 @@ void GameLevelLayer::onKeyReleased(EventKeyboard::KeyCode keycode, Event* event)
 void GameLevelLayer::update(float delta) {
 	//Point position = _player->getPosition();
 	//log("%f,%f", position.x, position.y);
+	
+	if (_player->getPositionX() > screenWidth/2 && _player->isAlive) {
+        
+        	timerLayer->setPositionX(_player->getPositionX() - screenWidth/2);
+        
+    	}
 
 	auto rightarrow = EventKeyboard::KeyCode::KEY_RIGHT_ARROW;
 
@@ -452,7 +457,7 @@ void GameLevelLayer::keyPressedDuration(EventKeyboard::KeyCode keycode, float de
 
 	case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 
-		if (_player->getPhysicsBody()->getVelocity().x > -1500) {
+		if (_player->getPhysicsBody()->getVelocity().x > -500) {
 
 			_player->getPhysicsBody()->applyImpulse(Vect(-3000, 0));
 
@@ -462,7 +467,7 @@ void GameLevelLayer::keyPressedDuration(EventKeyboard::KeyCode keycode, float de
 
 	case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 
-		if (_player->getPhysicsBody()->getVelocity().x < 1500) {
+		if (_player->getPhysicsBody()->getVelocity().x < 500) {
 
 			_player->getPhysicsBody()->applyImpulse(Vect(3000, 0));
 
@@ -476,9 +481,9 @@ void GameLevelLayer::keyPressedDuration(EventKeyboard::KeyCode keycode, float de
 
 			SimpleAudioEngine::getInstance()->playEffect("Jump.wav");
 
-			if (_player->getPhysicsBody()->getVelocity().y < 1000) {
+			if (_player->getPhysicsBody()->getVelocity().y < 500) {
 
-				_player->getPhysicsBody()->applyImpulse(Vect(0, 80000));
+				_player->getPhysicsBody()->applyImpulse(Vect(0, 40000));
 
 				_player->isOnGround = false;
 
@@ -508,7 +513,7 @@ void GameLevelLayer::setViewpointCenter(Vec2 position) {
 
 	int y = 0;
 
-	x = MIN(x, (map->getMapSize().width*map->getTileSize().width - screenWidth / 2));
+	x = MIN(x, (map->getMapSize().width*map->getTileSize().width*scale - screenWidth / 2));
 
 	Point actualPosition = Vec2(x, y);
 
@@ -707,6 +712,8 @@ void GameLevelLayer::updatewhenjump() {
 }
 
 void GameLevelLayer::playerdie() {
+	
+	_player->isAlive = false;
 
 	_player->stopAllActions();
 
@@ -723,6 +730,8 @@ void GameLevelLayer::playerdie() {
 	_player->getPhysicsBody()->setVelocity(Vec2(0, 1500));
 	int score = UserDefault::getInstance()->getIntegerForKey("score");
 	log("%d", score);
+	
+	scheduleOnce(schedule_selector(GameLevelLayer::dieDelay), 3);
 
 }
 
@@ -755,9 +764,13 @@ void GameLevelLayer::updateStart(float dt) {
 	scheduleUpdate();
 }
 
+void GameLevelLayer::dieDelay(float dt) {
+    toEndingScene(false);
+}
+
 Scene* GameLevelLayer::createScene() {
 	auto scene = Scene::createWithPhysics();
-	scene->getPhysicsWorld()->setGravity(Vect(0.0f, -15000.0f));
+	scene->getPhysicsWorld()->setGravity(Vect(0.0f, -3000.0f));
 	auto layer = GameLevelLayer::create();
 	scene->addChild(layer);
 	return scene;
