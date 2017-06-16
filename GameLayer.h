@@ -64,6 +64,7 @@ public:
 
 	void timer(float dt);
 	void updateStart(float dt);
+	void dieDelay(float dt);
 	
 	void toEndingScene(const bool& isPass);
     
@@ -92,5 +93,7 @@ private:
     	MenuItemLabel* saveLabel;
 	
     	Layer* timerLayer;
+	
+	float scale;
 
 };
