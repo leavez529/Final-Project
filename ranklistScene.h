@@ -13,6 +13,7 @@ USING_NS_CC;
 class ranklistScene : public Layer{
     
 public:
+    
     ranklistScene();
     
     ~ranklistScene();
@@ -26,6 +27,8 @@ public:
     void toMainScene();
     
     void backCallback(Ref* pSender);
+    
+    void sortScores();
     
 };
 
