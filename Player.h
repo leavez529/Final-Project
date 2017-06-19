@@ -27,6 +27,7 @@ public:
 
 	bool isOnGround;
 	bool isAlive;
+	bool isPassed;
 	Vec2 speed;
 
 };
