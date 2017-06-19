@@ -615,7 +615,33 @@ void GameLevelLayer::smallWalkLeft() {
 	_player->runAction(repeat);
 }
 
+void GameLevelLayer::enemyrun(Monster*szeName) {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("enemyrun.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <4; i++) {
+		std::string szName = StringUtils::format("enemy%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f /4.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "enemyrun");
+	auto enemydie = AnimationCache::getInstance()->getAnimation("enemyrun");
+	auto animate = Animate::create(enemydie);
+	auto repeat = RepeatForever::create(animate);
+	szeName->runAction(repeat);
+}
 
+
+void GameLevelLayer::enemydie(Sprite*Name) {
+	Name->stopAllActions();
+	scheduleUpdate();
+	Name->initWithFile("enemy5.png");
+	Name->getPhysicsBody()->setVelocity(Vec2::ZERO);
+	Name->getPhysicsBody()->setCategoryBitmask(0x02);
+	Name->getPhysicsBody()->setContactTestBitmask(0x02);
+	Name->getPhysicsBody()->setCollisionBitmask(0x02);
+	Name->getPhysicsBody()->setVelocity(Vec2(0, 150));
+}
 
 Vec2 GameLevelLayer::tileCoordForPosition(const Vec2& position) {
 	Size mapsize = map->getMapSize();
