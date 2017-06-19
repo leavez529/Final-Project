@@ -555,7 +555,7 @@ bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
 			}
 		}
 	}
-	}
+	
 	return true;
 
 }
