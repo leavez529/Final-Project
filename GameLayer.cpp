@@ -541,7 +541,7 @@ bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
 				SimpleAudioEngine::getInstance()->playEffect("Enemydie.wav");
 
 			}
-			if (spriteA->getTag() == 1 && spriteB->getTag() == 2 && spriteA->getPhysicsBody()->getGroup() == 0 && spriteB->getPhysicsBody()->getGroup() == 3
+			/*if (spriteA->getTag() == 1 && spriteB->getTag() == 2 && spriteA->getPhysicsBody()->getGroup() == 0 && spriteB->getPhysicsBody()->getGroup() == 3
 				&& ((spriteA->getPosition().x < spriteB->getPosition().x) || (spriteA->getPosition().x > spriteB->getPosition().x))) {
 				playerdie();
 				//toEndingScene(_player->isAlive);
@@ -550,7 +550,7 @@ bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
 				&& ((spriteA->getPosition().x < spriteB->getPosition().x) || (spriteA->getPosition().x > spriteB->getPosition().x))) {
 				playerdie();
 				//toEndingScene(_player->isAlive);
-			}
+			}*/
 		}
 	}
 	
