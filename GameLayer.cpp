@@ -76,6 +76,42 @@ bool GameLevelLayer::init() {
 	_player->setPhysicsBody(body);
 	this->addChild(_player, 1);//设置人物
 
+	auto objs = objects->getObjects();
+	ValueMap dict;
+	Value objPointMap;
+	for each(objPointMap in objs)
+	{
+		auto monsterPoint = objPointMap.asValueMap();
+		float monsterX = monsterPoint.at("x").asFloat();
+		float monsterY = monsterPoint.at("y").asFloat();
+		String type = monsterPoint.at("type").asString();;
+
+		if (type._string == "mushroom")
+		{
+			Monster* _Monster = Monster::create("enemy3.png");
+			_Monster->setScale(1);
+			_Monster->setTag(2);
+			auto body_m = PhysicsBody::createBox(_Monster->getContentSize());
+			body_m->setRotationEnable(false);
+			body_m->setEnabled(true);
+			body_m->setCategoryBitmask(0x01);
+			body_m->setContactTestBitmask(0x01);
+			body_m->setCollisionBitmask(0x01);
+			body_m->setGroup(3);
+			PhysicsShape* ps_m = body_m->getShape(0);
+			ps_m->setMass(0.2f);
+			ps_m->setFriction(0);
+			ps_m->setDensity(0.2f);
+			ps_m->setRestitution(0);
+			_Monster->setPhysicsBody(body_m);
+			this->addChild(_Monster, 1);
+			_Monster->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+			_Monster->setPosition(Point(monsterX, monsterY));
+			enemyrun(_Monster);
+		}
+	}
+	//怪物生成
+
 	Land = map->getLayer("land");
 
 	int gid;
@@ -428,6 +464,97 @@ bool GameLevelLayer::onContactBegin(PhysicsContact& contact) {
 
 			log("%d", score);
 		}
+		else
+		{
+			/*if (spriteA->getTag() == 2 && spriteA->getPhysicsBody()->getGroup() == 3 && spriteB->getPhysicsBody()->getGroup() == 1 && spriteA->getPosition().y == spriteB->getPosition().y)
+			{
+				if (spriteA->getPhysicsBody()->getVelocity().x<0)
+				{
+					spriteA->getPhysicsBody()->setVelocity(Vec2(1000, 0));
+				}
+				else if (spriteA->getPhysicsBody()->getVelocity().x>0)
+				{
+					spriteA->getPhysicsBody()->setVelocity(Vec2(-1000, 0));
+				}
+
+			}
+			if (spriteB->getTag() == 2 && spriteB->getPhysicsBody()->getGroup() == 3 && spriteA->getPhysicsBody()->getGroup() == 1 && spriteA->getPosition().y == spriteB->getPosition().y)
+			{
+				if (spriteB->getPhysicsBody()->getVelocity().x<0)
+				{
+					spriteB->getPhysicsBody()->setVelocity(Vec2(100, 0));
+				}
+				else if (spriteB->getPhysicsBody()->getVelocity().x>0)
+				{
+					spriteB->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+				}
+			}
+
+			if (spriteB->getTag() == 2 && spriteB->getPhysicsBody()->getGroup() == 3 && spriteA->getPhysicsBody()->getGroup() == 3 && spriteA->getTag() == 2 && spriteA->getPosition().y == spriteB->getPosition().y)
+			{
+				if (spriteA->getPhysicsBody()->getVelocity().x<0 && spriteB->getPhysicsBody()->getVelocity().x<0)
+				{
+					if (spriteA->getPhysicsBody()->getPosition().x>spriteB->getPhysicsBody()->getPosition().x)
+					{
+						spriteB->getPhysicsBody()->setVelocity(Vec2(150, 0));
+						spriteA->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+					}
+					if (spriteA->getPhysicsBody()->getPosition().x<spriteB->getPhysicsBody()->getPosition().x)
+					{
+						spriteA
+							->getPhysicsBody()->setVelocity(Vec2(150, 0));
+						spriteB->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+					}
+				}
+				if (spriteA->getPhysicsBody()->getVelocity().x>0 && spriteB->getPhysicsBody()->getVelocity().x<0)
+				{
+					spriteA->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+					spriteB->getPhysicsBody()->setVelocity(Vec2(100, 0));
+				}
+				if (spriteA->getPhysicsBody()->getVelocity().x<0 && spriteB->getPhysicsBody()->getVelocity().x>0)
+				{
+					spriteA->getPhysicsBody()->setVelocity(Vec2(100, 0));
+					spriteB->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+				}
+				if (spriteA->getPhysicsBody()->getVelocity().x>0 && spriteB->getPhysicsBody()->getVelocity().x>0)
+				{
+					if (spriteA->getPhysicsBody()->getPosition().x>spriteB->getPhysicsBody()->getPosition().x)
+					{
+						spriteA->getPhysicsBody()->setVelocity(Vec2(150, 0));
+						spriteB->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+					}
+					if (spriteA->getPhysicsBody()->getPosition().x<spriteB->getPhysicsBody()->getPosition().x)
+					{
+						spriteB->getPhysicsBody()->setVelocity(Vec2(150, 0));
+						spriteA->getPhysicsBody()->setVelocity(Vec2(-100, 0));
+					}
+				}
+			}*/
+			if (spriteA->getTag() == 1 && spriteA->getPhysicsBody()->getGroup() != 3 && spriteB->getPhysicsBody()->getGroup() == 3 && spriteA->getPosition().y> spriteB->getPosition().y)
+			{
+
+				enemydie(spriteB);
+				SimpleAudioEngine::getInstance()->playEffect("Enemydie.wav");
+
+			}
+			if (spriteA->getPhysicsBody()->getGroup() == 3 && spriteB->getPhysicsBody()->getGroup() != 3 && spriteB->getTag() == 1 && spriteA->getPosition().y<spriteB->getPosition().y)
+			{
+				enemydie(spriteA);
+				SimpleAudioEngine::getInstance()->playEffect("Enemydie.wav");
+
+			}
+			if (spriteA->getTag() == 1 && spriteB->getTag() == 2 && spriteA->getPhysicsBody()->getGroup() == 0 && spriteB->getPhysicsBody()->getGroup() == 3
+				&& ((spriteA->getPosition().x < spriteB->getPosition().x) || (spriteA->getPosition().x > spriteB->getPosition().x))) {
+				playerdie();
+				//toEndingScene(_player->isAlive);
+			}
+			if (spriteB->getTag() == 1 && spriteA->getPhysicsBody()->getGroup() == 3 && spriteB->getPhysicsBody()->getGroup() == 0 && spriteA->getTag() == 2
+				&& ((spriteA->getPosition().x < spriteB->getPosition().x) || (spriteA->getPosition().x > spriteB->getPosition().x))) {
+				playerdie();
+				//toEndingScene(_player->isAlive);
+			}
+		}
+	}
 	}
 	return true;
 

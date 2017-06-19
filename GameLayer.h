@@ -4,6 +4,8 @@
 #include"MenuLayer.h"
 #include"endingScene.h"
 #include"SimpleAudioEngine.h"
+#include"Monster.h"
+#include"Unit.h"
 using namespace CocosDenshion;
 
 
@@ -46,6 +48,10 @@ public:
 	void menuCallBack(Ref* pSender);
 	void toFlag();
 
+	Monster* _monster;
+	Unit*_unit;
+	void enemyrun(Monster*szeName);
+	void enemydie(Sprite*Name);
 protected:
 	cocos2d::CCTMXTiledMap *map;
 	cocos2d::TMXLayer *Land;
