@@ -20,6 +20,9 @@ public:
 	CREATE_FUNC(MenuLayer);
 
 	void toGameScene();
+	
+	void toRanklistScene();
+	
 	static Scene* createScene();
 };
 
