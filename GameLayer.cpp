@@ -77,11 +77,9 @@ bool GameLevelLayer::init() {
 	this->addChild(_player, 1);//设置人物
 
 	auto objs = objects->getObjects();
-	ValueMap dict;
-	Value objPointMap;
-	for each(objPointMap in objs)
+	for (int i=0;i<objs.size();i++)
 	{
-		auto monsterPoint = objPointMap.asValueMap();
+		auto monsterPoint = objs.at(i).asValueMap();
 		float monsterX = monsterPoint.at("x").asFloat();
 		float monsterY = monsterPoint.at("y").asFloat();
 		String type = monsterPoint.at("type").asString();;
