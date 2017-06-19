@@ -18,7 +18,7 @@ void MenuLayer::menuCallback(Ref* pSender) {
 		
 		break;
 	case 3:
-		toGameScene();
+		toRanklistScene();
 		break;
 	case 4:
 		Director::getInstance()->end();
