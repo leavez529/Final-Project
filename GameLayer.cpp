@@ -613,6 +613,40 @@ void GameLevelLayer::smallWalkLeft() {
 	_player->runAction(repeat);
 }
 
+void GameLevelLayer::walkRight() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("walkRight.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("walkRight%d.gif", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "walkRight");
+	auto walkRight = AnimationCache::getInstance()->getAnimation("walkRight");
+	auto animate = Animate::create(walkRight);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(13);
+	_player->runAction(repeat);
+}
+
+void GameLevelLayer::walkLeft() {
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("walkLeft.plist");
+	auto animation = Animation::create();
+	for (int i = 1; i <11; i++) {
+		std::string szName = StringUtils::format("walkLeft%d.png", i);
+		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(szName));
+	}
+	animation->setDelayPerUnit(1.0f / 15.0f);
+	animation->setRestoreOriginalFrame(true);
+	AnimationCache::getInstance()->addAnimation(animation, "walkLeft");
+	auto walkLeft = AnimationCache::getInstance()->getAnimation("walkLeft");
+	auto animate = Animate::create(walkLeft);
+	auto repeat = RepeatForever::create(animate);
+	repeat->setTag(14);
+	_player->runAction(repeat);
+}
+
 void GameLevelLayer::enemyrun(Monster*szeName) {
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("enemyrun.plist");
 	auto animation = Animation::create();
