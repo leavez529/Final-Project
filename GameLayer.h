@@ -25,12 +25,16 @@ public:
 	void onKeyReleased(EventKeyboard::KeyCode keycode, Event* event);
 	void update(float delta);
 	Player* _player;
+	Monster* _monster;
+	Unit*_unit;
 	float scale;
 	bool isKeyPressed(EventKeyboard::KeyCode keycode);
 	bool sound;
 	void keyPressedDuration(EventKeyboard::KeyCode keycode, float delta);
 	void smallWalkRight();
 	void smallWalkLeft();
+	void walkRight();
+	void walkLeft();
 	void setViewpointCenter(Vec2 positon);
 	bool onContactBegin(PhysicsContact& contact);
 	bool onContactPreSolve(PhysicsContact& contact, PhysicsContactPreSolve& solve);
@@ -47,9 +51,6 @@ public:
 	void toNextGame(float dt);
 	void menuCallBack(Ref* pSender);
 	void toFlag();
-
-	Monster* _monster;
-	Unit*_unit;
 	void enemyrun(Monster*szeName);
 	void enemydie(Sprite*Name);
 protected:
